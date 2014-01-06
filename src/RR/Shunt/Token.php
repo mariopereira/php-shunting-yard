@@ -32,44 +32,31 @@
 
 namespace RR\Shunt;
 
-use Exception;
-use RR\Shunt\Exception\RuntimeError;
-
-class Context
+class Token
 {
-    protected $fnt = array(), $cst = array('PI' => M_PI, 'π' => M_PI);
 
-    public function fn($name, array $args)
+    const T_NUMBER      = 1,  // eine nummer (integer / double)
+          T_IDENT       = 2,  // konstante
+          T_FUNCTION    = 4,  // funktion
+          T_POPEN       = 8,  // (
+          T_PCLOSE      = 16,  // )
+          T_COMMA       = 32, // ,
+          T_OPERATOR    = 64, // operator (derzeit ungenutzt)
+          T_PLUS        = 65, // +
+          T_MINUS       = 66, // -
+          T_TIMES       = 67, // *
+          T_DIV         = 68, // /
+          T_MOD         = 69, // %
+          T_POW         = 70, // ^
+          T_UNARY_PLUS  = 71, // + als vorzeichen (zur übersetzungszeit ermittelt)
+          T_UNARY_MINUS = 72, // - als vorzeichen (zur übersetzungszeit ermittelt)
+          T_NOT         = 73; // ! als vorzeichen
+
+    public $type, $value, $argc = 0;
+
+    public function __construct($type, $value)
     {
-        if (!isset($this->fnt[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte funktion "' . $name . '"');
-        }
-
-        return (float) call_user_func_array($this->fnt[$name], $args);
-    }
-
-    public function cs($name)
-    {
-        if (!isset($this->cst[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte konstante "' . $name . '"');
-        }
-
-        return $this->cst[$name];
-    }
-
-    public function def($name, $value = null)
-    {
-        // einfacher wrapper
-        if ($value === null) {
-            $value = $name;
-        }
-
-        if (is_callable($value)) {
-            $this->fnt[$name] = $value;
-        } elseif (is_numeric($value)) {
-            $this->cst[$name] = (float) $value;
-        } else {
-            throw new Exception('funktion oder nummer erwartet');
-        }
+        $this->type  = $type;
+        $this->value = $value;
     }
 }
