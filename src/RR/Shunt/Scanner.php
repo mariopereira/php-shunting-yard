@@ -117,6 +117,7 @@ class Scanner
         }
     }
 
+    public function reset() { reset($this->tokens); } // call before reusing Scanner instance
     public function curr() { return current($this->tokens); }
     public function next() { return next($this->tokens); }
     public function prev() { return prev($this->tokens); }

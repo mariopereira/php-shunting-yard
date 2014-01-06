@@ -42,6 +42,7 @@ class Parser
 
     protected $scanner, $state = self::ST_1;
     protected $queue, $stack;
+    protected $queueCopy;
 
     public function __construct(Scanner $scanner)
     {
@@ -64,10 +65,20 @@ class Parser
 
             $this->queue[] = $t;
         }
-    }
 
-    public function reduce(Context $ctx)
-    {
+        // maintain copy of queue
+        $this->queueCopy = $this->queue;
+      }
+
+      private function reset()
+      {
+        $this->queue = $this->queueCopy;
+        $this->scanner->reset();
+      }
+
+      public function reduce(Context $ctx)
+      {
+        $this->reset();
         $this->stack = array();
         $len = 0;
 
