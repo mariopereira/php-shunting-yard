@@ -1,6 +1,6 @@
 ### PHP Shunting Yard Implementation
 
-Master: [![Master Build Status](https://travis-ci.org/andig/php-shunting-yard.png?branch=master)](https://travis-ci.org/andig/php-shunting-yard)
+Master: [![Master Build Status](https://travis-ci.org/andig/php-shunting-yard.png)](https://travis-ci.org/andig/php-shunting-yard)
 
 ## Example
 
@@ -30,7 +30,8 @@ echo $result; //3.0001220703125
 
 ## Authors
 
-Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from https://github.com/andig/php-shunting-yard. This is just a refactoring and repack for composer/packagist.
+Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from https://github.com/andig/php-shunting-yard. 
+Test cases and refactoring for composer/packagist by https://github.com/sergej-kurakin/php-shunting-yard.
 
 ## Installation Via Composer
 
