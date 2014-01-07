@@ -26,6 +26,23 @@ class FunctionParserTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testFunctionCallWithoutParam()
+    {
+        $context = new Context();
+        $context->def(
+            'myfunc',
+            function () {
+                return 1;
+            }
+        );
+
+        $equation = '12 + myfunc() * 2';
+        $actual = Parser::parse($equation, $context);
+
+        $expected = 14;
+        $this->assertEquals($expected, $actual);
+    }
+
     public function testFunctionCallWithTwoParams()
     {
         $context = new Context();
@@ -82,6 +99,55 @@ class FunctionParserTest extends \PHPUnit_Framework_TestCase
 
         $expected = 100;
         $this->assertEquals($expected, $actual);
+    }
+
+    public function testWrapPHPFunctionWithoutParam()
+    {
+        $context = new Context();
+        $context->def('pi');
+
+        $equation = 'pi()';
+        $actual = Parser::parse($equation, $context);
+
+        $expected = 3.1415926535898;
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testWrapPHPFunctionWithoutParamNested()
+    {
+        $context = new Context();
+        $context->def('pi');
+        $context->def('min');
+
+        $equation = 'min(pi(),0)';
+        $actual = Parser::parse($equation, $context);
+
+        $expected = 0;
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @expectedException RR\Shunt\Exception\ParseError
+     */
+    public function testParserExceptionMissingClosingBracket()
+    {
+        $context = new Context();
+        $context->def('pi');
+
+        $equation = 'pi(';
+        $actual = Parser::parse($equation, $context);
+    }
+
+    /**
+     * @expectedException RR\Shunt\Exception\ParseError
+     */
+    public function testParserExceptionSurplusClosingBracket()
+    {
+        $context = new Context();
+        $context->def('pi');
+
+        $equation = 'pi())';
+        $actual = Parser::parse($equation, $context);
     }
 
 }
