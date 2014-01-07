@@ -33,7 +33,7 @@ echo $result; //3.0001220703125
 Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from https://github.com/andig/php-shunting-yard. 
 Test cases and refactoring for composer/packagist by https://github.com/sergej-kurakin/php-shunting-yard.
 
-## Installation Via Composer
+### Installation Via Composer
 
 Define the following requirement in your composer.json file:
 
