@@ -37,7 +37,7 @@ $ctx = new Context();
 $ctx->def('data', function() { global $counter; return $counter++; }); // define function
 $ctx->def('bar', function($a) { return 2*$a; }); // define function
 
-$equation = 'bar(data());
+$equation = 'bar(data())';
 $parser = new Parser(new Scanner($equation));
 
 $result = $parser->reduce($this->ctx); // first result
