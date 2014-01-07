@@ -27,6 +27,24 @@ $equation = '3 + bar(4, 2) / (abs(-1) - foo) ^ 2 ^ 3';
 $result = Parser::parse($equation, $ctx);
 echo $result; //3.0001220703125
 ```
+Re-run parsed expression on multiple inputs
+```php
+use RR\Shunt\Parser;
+use RR\Shunt\Context;
+
+$counter = 1;
+$ctx = new Context();
+$ctx->def('data', function() { global $counter; return $counter++; }); // define function
+$ctx->def('bar', function($a) { return 2*$a; }); // define function
+
+$equation = 'bar(data());
+$parser = new Parser(new Scanner($equation));
+
+$result = $parser->reduce($this->ctx); // first result
+echo $result; // 2
+$result = $parser->reduce($this->ctx); // second result
+echo $result; // 4
+```
 
 ### Authors
 
