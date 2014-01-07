@@ -1,7 +1,6 @@
 ### PHP Shunting Yard Implementation
 
-Master: [![Master Build Status](https://travis-ci.org/sergej-kurakin/php-shunting-yard.png?branch=master)](https://travis-ci.org/sergej-kurakin/php-shunting-yard)
-Develop: [![Dev Build Status](https://travis-ci.org/sergej-kurakin/php-shunting-yard.png?branch=dev)](https://travis-ci.org/sergej-kurakin/php-shunting-yard)
+Master: [![Master Build Status](https://travis-ci.org/andig/php-shunting-yard.png?branch=master)](https://travis-ci.org/andig/php-shunting-yard)
 
 ## Example
 
@@ -40,7 +39,7 @@ Define the following requirement in your composer.json file:
 ```json
 {
     "require": {
-        "sergej-kurakin/php-shunting-yard": "dev-master"
+        "andig/php-shunting-yard": "dev-master"
     }
 }
 ```
