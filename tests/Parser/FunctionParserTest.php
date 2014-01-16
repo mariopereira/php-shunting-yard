@@ -58,6 +58,12 @@ class FunctionParserTest extends \PHPUnit_Framework_TestCase
 
         $expected = 312;
         $this->assertEquals($expected, $actual);
+
+        $equation = 'myfunc(1,-2)';
+        $actual = Parser::parse($equation, $context);
+
+        $expected = -1;
+        $this->assertEquals($expected, $actual);
     }
 
     public function testFunctionCallWithDefaultParamValue()

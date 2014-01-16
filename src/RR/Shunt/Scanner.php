@@ -90,11 +90,11 @@ class Scanner
 
             switch ($type = isset($this->lookup[$value]) ? $this->lookup[$value] : Token::T_IDENT) {
                 case Token::T_PLUS:
-                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN) $type = Token::T_UNARY_PLUS;
+                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) $type = Token::T_UNARY_PLUS;
                     break;
 
                 case Token::T_MINUS:
-                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN) $type = Token::T_UNARY_MINUS;
+                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) $type = Token::T_UNARY_MINUS;
                     break;
 
                 case Token::T_POPEN:
