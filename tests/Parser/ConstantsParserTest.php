@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Sergej Kurakin
- * Date: 14.1.4
- * Time: 19.20
- */
 
 namespace tests\Parser;
 
@@ -44,6 +38,13 @@ class ConstantsParserTest extends \PHPUnit_Framework_TestCase
                     'b' => 3,
                 ),
                 (4+3),
+            ),
+            array(
+                '-a',
+                array(
+                    'a' => 1,
+                ),
+                (-1),
             ),
             array(
                 'a-b',
@@ -105,6 +106,17 @@ class ConstantsParserTest extends \PHPUnit_Framework_TestCase
                 0.125
             ),
         );
+    }
+
+    public function testParserWithStringConstants()
+    {
+        $context = new Context();
+        $const = 'string constant';
+        $context->def('const', $const, 'string');
+
+        $actual = Parser::parse('const', $context);
+
+        $this->assertEquals($const, $actual);
     }
 
 }

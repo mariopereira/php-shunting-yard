@@ -57,17 +57,19 @@ class Context
         return $this->cst[$name];
     }
 
-    public function def($name, $value = null)
+    public function def($name, $value = null, $type = 'float')
     {
         // einfacher wrapper
         if ($value === null) {
             $value = $name;
         }
 
-        if (is_callable($value)) {
+        if (is_callable($value) && $type == 'float') {
             $this->fnt[$name] = $value;
-        } elseif (is_numeric($value)) {
+        } elseif (is_numeric($value) && $type == 'float') {
             $this->cst[$name] = (float) $value;
+        } elseif (is_string($value) && $type == 'string') {
+            $this->cst[$name] = $value;
         } else {
             throw new Exception('funktion oder nummer erwartet');
         }

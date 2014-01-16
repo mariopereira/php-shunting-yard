@@ -64,17 +64,24 @@ class ConstantDefinitionTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Exception
      */
-    public function testNonNumericConstantDefinition()
+    public function testNonNumericConstantDefinitionException()
     {
         $context = new Context();
 
         $context->def('const', 'Just a String That Causes Error #$#$%#@');
     }
 
+    public function testNonNumericConstantDefinition()
+    {
+        $context = new Context();
+
+        $context->def('const', 'string constant', 'string');
+    }
+
     /**
      * @expectedException \RR\Shunt\Exception\RuntimeError
      */
-    public function testCallNotsetConstantCausesException()
+    public function testCallNotSetConstantCausesException()
     {
         $context = new Context();
 
