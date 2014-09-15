@@ -1,7 +1,5 @@
 ## PHP Shunting Yard Implementation
 
-Build status: [![Build status](https://travis-ci.org/andig/php-shunting-yard.png)](https://travis-ci.org/andig/php-shunting-yard)
-
 ### Example
 
 Simple equation parsing
@@ -58,7 +56,7 @@ Define the following requirement in your composer.json file:
 ```json
 {
     "require": {
-        "andig/php-shunting-yard": "dev-master"
+        "pmishev/php-shunting-yard": "dev-master"
     }
 }
 ```
