@@ -37,10 +37,10 @@ use RR\Shunt\Exception\ParseError;
 
 class Parser
 {
-    const ST_1 = 1, // waiting for operand or unary sign
-          ST_2 = 2; // waiting for operator
+    const WAITING_FOR_OPERAND_OR_UNARY_SIGN = 1,    // waiting for operand or unary sign
+          WAITING_FOR_OPERATOR = 2;                 // waiting for operator
 
-    protected $scanner, $state = self::ST_1;
+    protected $scanner, $state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
     protected $queue, $stack;
     protected $queueCopy;
 
@@ -87,12 +87,13 @@ class Parser
         while ($t = array_shift($this->queue)) {
             switch ($t->type) {
                 case Token::T_NUMBER:
+                case Token::T_NULL:
                 case Token::T_IDENT:
                     // determine constant value
                     if ($t->type === Token::T_IDENT)
                         $t = new Token(Token::T_NUMBER, $ctx->cs($t->value));
 
-                    // If the token is a value or identifier
+                    // If the token is a value, null or identifier
                     // Push it onto the stack.
                     $this->stack[] = $t;
                     ++$len;
@@ -126,7 +127,7 @@ class Parser
                     $len -= $na - 1;
 
                     // Push the returned results, if any, back onto the stack.
-                    $this->stack[] = new Token(Token::T_NUMBER, $this->op($t->type, $lhs, $rhs));
+                    $this->stack[] = new Token(Token::T_NUMBER, $this->op($t->type, $lhs, $rhs, $ctx));
                     break;
 
                 case Token::T_FUNCTION:
@@ -158,8 +159,13 @@ class Parser
         throw new RuntimeError('run-time error: too many values ​​in the stack');
     }
 
-    protected function op($op, $lhs, $rhs)
+    protected function op($op, $lhs, $rhs, Context $ctx)
     {
+        // If there is a custom operator handler function defined in the context, call it instead
+        if ($ctx->hasCustomOperatorHandler($op)) {
+            return $ctx->execCustomOperatorHandler($op, $lhs->value, $rhs->value);
+        }
+
         if ($lhs !== null) {
             $lhs = $lhs->value;
             $rhs = $rhs->value;
@@ -273,10 +279,11 @@ class Parser
     {
         switch ($t->type) {
             case Token::T_NUMBER:
+            case Token::T_NULL:
             case Token::T_IDENT:
-                // If the token is a number (identifier), then add it to the output queue.
+                // If the token is a number, NULL or identifier, then add it to the output queue.
                 $this->queue[] = $t;
-                $this->state = self::ST_2;
+                $this->state = self::WAITING_FOR_OPERATOR;
                 break;
 
             case Token::T_FUNCTION:
@@ -354,13 +361,13 @@ class Parser
 
                 // push op1 onto the stack.
                 $this->stack[] = $t;
-                $this->state = self::ST_1;
+                $this->state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
                 break;
 
             case Token::T_POPEN:
                 // If the token is a left parenthesis, then push it onto the stack.
                 $this->stack[] = $t;
-                $this->state = self::ST_1;
+                $this->state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
                 break;
 
             // If the token is a right parenthesis:
@@ -387,7 +394,7 @@ class Parser
                 if (($t = end($this->stack)) && $t->type === Token::T_FUNCTION)
                     $this->queue[] = array_pop($this->stack);
 
-                $this->state = self::ST_2;
+                $this->state = self::WAITING_FOR_OPERATOR;
                 break;
 
             default:

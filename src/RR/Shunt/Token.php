@@ -39,7 +39,7 @@ class Token
           T_IDENT       = 2,  // constant
           T_FUNCTION    = 4,  // function
           T_POPEN       = 8,  // (
-          T_PCLOSE      = 16,  // )
+          T_PCLOSE      = 16, // )
           T_COMMA       = 32, // ,
           T_OPERATOR    = 64, // operator (currently unused)
           T_PLUS        = 65, // +
@@ -50,7 +50,8 @@ class Token
           T_POW         = 70, // ^
           T_UNARY_PLUS  = 71, // + unsigned number (determined during parsing)
           T_UNARY_MINUS = 72, // - signed number (determined during parsing)
-          T_NOT         = 73; // !
+          T_NOT         = 73, // !
+          T_NULL        = 128; // null
 
     public $type, $value, $argc = 0;
 
@@ -58,5 +59,15 @@ class Token
     {
         $this->type  = $type;
         $this->value = $value;
+    }
+
+    /**
+     * @return string The name of the constant matching the token type
+     */
+    public function getTypeName()
+    {
+        $constants = (new \ReflectionClass($this))->getConstants();
+        $flipped = array_flip($constants);
+        return $flipped[$this->type];
     }
 }

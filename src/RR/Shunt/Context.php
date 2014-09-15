@@ -37,26 +37,67 @@ use RR\Shunt\Exception\RuntimeError;
 
 class Context
 {
-    protected $fnt = array(), $cst = array('PI' => M_PI, 'π' => M_PI);
+    protected $functions = array();
+    protected $constants = array('PI' => M_PI, 'π' => M_PI);
+    protected $operatorHandlers = array();
 
+    /**
+     * Call a user-defined custom function and returns the result
+     *
+     * @param $name The name of the function
+     * @param array $args The arguments to pass to the function
+     * @return float The result returned from the function
+     * @throws RuntimeError
+     */
     public function fn($name, array $args)
     {
-        if (!isset($this->fnt[$name])) {
+        if (!isset($this->functions[$name])) {
             throw new RuntimeError('run-time error: undefined function "' . $name . '"');
         }
 
-        return (float) call_user_func_array($this->fnt[$name], $args);
+        return (float) call_user_func_array($this->functions[$name], $args);
     }
 
+    /**
+     * Returns the value of a custom-defined constant
+     *
+     * @param $name
+     * @return mixed
+     * @throws RuntimeError
+     */
     public function cs($name)
     {
-        if (!isset($this->cst[$name])) {
+        if (!isset($this->constants[$name])) {
             throw new RuntimeError('run-time error: undefined constant "' . $name . '"');
         }
 
-        return $this->cst[$name];
+        return $this->constants[$name];
     }
 
+    /**
+     * @param $op Operator integer value (as defined in Token)
+     * @param $lhsValue The left-hand side operand
+     * @param $rhsValue The right-hand side operand
+     * @return float
+     * @throws RuntimeError
+     */
+    public function execCustomOperatorHandler($op, $lhsValue, $rhsValue)
+    {
+        if (!isset($this->operatorHandlers[$op])) {
+            throw new RuntimeError('run-time error: undefined operator handler "' . $op . '"');
+        }
+
+        return (float) call_user_func_array($this->operatorHandlers[$op], array($lhsValue, $rhsValue));
+    }
+
+    /**
+     * Define a custom constant or a function
+     *
+     * @param $name Name of the constant or function
+     * @param mixed $value
+     * @param string $type
+     * @throws \Exception
+     */
     public function def($name, $value = null, $type = 'float')
     {
         // wrapper for simple PHP functions
@@ -65,13 +106,32 @@ class Context
         }
 
         if (is_callable($value) && $type == 'float') {
-            $this->fnt[$name] = $value;
+            $this->functions[$name] = $value;
         } elseif (is_numeric($value) && $type == 'float') {
-            $this->cst[$name] = (float) $value;
+            $this->constants[$name] = (float) $value;
         } elseif (is_string($value) && $type == 'string') {
-            $this->cst[$name] = $value;
+            $this->constants[$name] = $value;
         } else {
             throw new Exception('function or number expected');
         }
+    }
+
+    /**
+     * Register custom handler function for an operator
+     */
+    public function defOperator($operator, callable $func)
+    {
+        $this->operatorHandlers[$operator] = $func;
+    }
+
+    /**
+     * Check whether there is a custom handler defined for an operator
+     *
+     * @param int $operator
+     * @return bool
+     */
+    public function hasCustomOperatorHandler($operator)
+    {
+        return isset($this->operatorHandlers[$operator]);
     }
 }
