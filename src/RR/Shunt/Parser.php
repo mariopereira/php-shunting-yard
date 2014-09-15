@@ -1,12 +1,12 @@
 <?php
 
 /*!
- * PHP Shunting-yard Implementierung
+ * PHP Shunting-yard Implementation
  * Copyright 2012 - droptable <murdoc@raidrush.org>
  *
- * PHP 5.4 benötigt
+ * PHP 5.4 required
  *
- * Referenz: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
+ * Reference: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
  *
  * ----------------------------------------------------------------
  *
@@ -61,7 +61,7 @@ class Parser
         // While there are still operator tokens in the stack:
         while ($t = array_pop($this->stack)) {
             if ($t->type === Token::T_POPEN || $t->type === Token::T_PCLOSE)
-                throw new ParseError('parser fehler: fehlerhafte verschachtelung von `(` und `)`');
+                throw new ParseError('parser error: incorrect nesting of `(` and `)`');
 
             $this->queue[] = $t;
         }
@@ -304,7 +304,7 @@ class Parser
                 // If no left parentheses are encountered, either the separator was misplaced
                 // or parentheses were mismatched.
                 if ($pe !== true)
-                    throw new ParseError('parser fehler: vermisster token `(` oder fehlplazierter token `,`');
+                    throw new ParseError('parser error: missing token `(` or misplaced token `,`');
 
                 break;
 
