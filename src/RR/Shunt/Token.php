@@ -35,22 +35,22 @@ namespace RR\Shunt;
 class Token
 {
 
-    const T_NUMBER      = 1,  // eine nummer (integer / double)
-          T_IDENT       = 2,  // konstante
-          T_FUNCTION    = 4,  // funktion
+    const T_NUMBER      = 1,  // a number (integer / double)
+          T_IDENT       = 2,  // constant
+          T_FUNCTION    = 4,  // function
           T_POPEN       = 8,  // (
           T_PCLOSE      = 16,  // )
           T_COMMA       = 32, // ,
-          T_OPERATOR    = 64, // operator (derzeit ungenutzt)
+          T_OPERATOR    = 64, // operator (currently unused)
           T_PLUS        = 65, // +
           T_MINUS       = 66, // -
           T_TIMES       = 67, // *
           T_DIV         = 68, // /
           T_MOD         = 69, // %
           T_POW         = 70, // ^
-          T_UNARY_PLUS  = 71, // + als vorzeichen (zur übersetzungszeit ermittelt)
-          T_UNARY_MINUS = 72, // - als vorzeichen (zur übersetzungszeit ermittelt)
-          T_NOT         = 73; // ! als vorzeichen
+          T_UNARY_PLUS  = 71, // + unsigned number (determined during parsing)
+          T_UNARY_MINUS = 72, // - signed number (determined during parsing)
+          T_NOT         = 73; // ! 
 
     public $type, $value, $argc = 0;
 

@@ -37,8 +37,8 @@ use RR\Shunt\Exception\ParseError;
 
 class Parser
 {
-    const ST_1 = 1, // wartet auf operand oder unäre vorzeichen
-          ST_2 = 2; // wartet auf operator
+    const ST_1 = 1, // waiting for operand or unary sign
+          ST_2 = 2; // waiting for operator
 
     protected $scanner, $state = self::ST_1;
     protected $queue, $stack;
@@ -48,11 +48,11 @@ class Parser
     {
         $this->scanner = $scanner;
 
-        // alloc
+        // init
         $this->queue = array();
         $this->stack = array();
 
-        // queue erzeugen
+        // create queue
         while (($t = $this->scanner->next()) !== false) {
             $this->handle($t);
         }
@@ -88,7 +88,7 @@ class Parser
             switch ($t->type) {
                 case Token::T_NUMBER:
                 case Token::T_IDENT:
-                    // wert einer konstanten ermitteln
+                    // determine constant value
                     if ($t->type === Token::T_IDENT)
                         $t = new Token(Token::T_NUMBER, $ctx->cs($t->value));
 
@@ -112,7 +112,7 @@ class Parser
 
                     // If there are fewer than n values on the stack
                     if ($len < $na)
-                        throw new RuntimeError('laufzeit fehler: zu wenig paramter für operator "' . $t->value . '" (' . $na . ' -> ' . $len . ')');
+                        throw new RuntimeError('run-time error: too few parameters for operator "' . $t->value . '" (' . $na . ' -> ' . $len . ')');
 
                     $rhs = array_pop($this->stack);
                     $lhs = null;
@@ -144,7 +144,7 @@ class Parser
                     break;
 
                 default:
-                    throw new RuntimeError('laufzeit fehler: unerwarteter token `' . $t->value . '`');
+                    throw new RuntimeError('run-time error: unexpected token `' . $t->value . '`');
             }
         }
 
@@ -155,7 +155,7 @@ class Parser
 
         // If there are more values in the stack
         // (Error) The user input has too many values.
-        throw new RuntimeError('laufzeit fehler: zu viele werte im stack');
+        throw new RuntimeError('run-time error: too many values ​​in the stack');
     }
 
     protected function op($op, $lhs, $rhs)
@@ -176,15 +176,14 @@ class Parser
 
                 case Token::T_DIV:
                     if ($rhs === 0.)
-                        throw new RuntimeError('laufzeit fehler: teilung durch 0');
+                        throw new RuntimeError('run-time error: division by zero');
 
                     return $lhs / $rhs;
 
                 case Token::T_MOD:
                     if ($rhs === 0.)
-                        throw new RuntimeError('laufzeit fehler: rest-teilung durch 0');
+                        throw new RuntimeError('run-time error: rest-division by zero');
 
-                    // php (bzw. c) kann hier nur mit ganzzahlen umgehen
                     return (float)$lhs % $rhs;
 
                 case Token::T_POW:
@@ -382,7 +381,7 @@ class Parser
 
                 // If the stack runs out without finding a left parenthesis, then there are mismatched parentheses.
                 if ($pe !== true)
-                    throw new ParseError('parser fehler: unerwarteter token `)`');
+                    throw new ParseError('parser error: unexpected token `)`');
 
                 // If the token at the top of the stack is a function token, pop it onto the output queue.
                 if (($t = end($this->stack)) && $t->type === Token::T_FUNCTION)
@@ -392,7 +391,7 @@ class Parser
                 break;
 
             default:
-                throw new ParseError('parser fehler: unbekannter token "' . $t->value . '"');
+                throw new ParseError('parser error: unknown token "' . $t->value . '"');
         }
     }
 
@@ -415,7 +414,7 @@ class Parser
                 return 2; //rtl
         }
 
-        // ggf. erweitern :-)
+        // possibly expand :-)
         return 0; //nassoc
     }
 

@@ -42,7 +42,7 @@ class Context
     public function fn($name, array $args)
     {
         if (!isset($this->fnt[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte funktion "' . $name . '"');
+            throw new RuntimeError('run-time error: undefined function "' . $name . '"');
         }
 
         return (float) call_user_func_array($this->fnt[$name], $args);
@@ -51,7 +51,7 @@ class Context
     public function cs($name)
     {
         if (!isset($this->cst[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte konstante "' . $name . '"');
+            throw new RuntimeError('run-time error: undefined constant "' . $name . '"');
         }
 
         return $this->cst[$name];
@@ -59,7 +59,7 @@ class Context
 
     public function def($name, $value = null, $type = 'float')
     {
-        // einfacher wrapper
+        // wrapper for simple PHP functions
         if ($value === null) {
             $value = $name;
         }
@@ -71,7 +71,7 @@ class Context
         } elseif (is_string($value) && $type == 'string') {
             $this->cst[$name] = $value;
         } else {
-            throw new Exception('funktion oder nummer erwartet');
+            throw new Exception('function or number expected');
         }
     }
 }

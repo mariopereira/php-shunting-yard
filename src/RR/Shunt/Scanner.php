@@ -36,11 +36,11 @@ use RR\Shunt\Exception\SyntaxError;
 
 class Scanner
 {
-    //                  operatoren          nummern               wörter                  leerzeichen
+    //                  operator            number                word                     blank
     const PATTERN = '/^([!,\+\-\*\/\^%\(\)]|\d*\.\d+|\d+\.\d*|\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \t]+)/';
 
-    const ERR_EMPTY = 'leerer fund! (endlosschleife) in der nähe von: `%s`',
-        ERR_MATCH = 'syntax fehler in der nähe von `%s`';
+    const ERR_EMPTY = 'nothing found! (endless loop) near: `%s`';
+    const ERR_MATCH = 'syntax error near `%s`';
 
     protected $tokens = array( 0 );
 
@@ -63,20 +63,20 @@ class Scanner
 
         while (trim($input) !== '') {
             if (!preg_match(self::PATTERN, $input, $match)) {
-                // syntax fehler
+                // syntax error
                 throw new SyntaxError(sprintf(self::ERR_MATCH, substr($input, 0, 10)));
             }
 
             if (empty($match[1]) && $match[1] !== '0') {
-                // leerer fund -> endlosschleife vermeiden
+                // nothing found -> avoid endless loop
                 throw new SyntaxError(sprintf(self::ERR_EMPTY, substr($input, 0, 10)));
             }
 
-            // aktuellen wert von input abziehen
+            // current value of reduced input
             $input = substr($input, strlen($match[1]));
 
             if (($value = trim($match[1])) === '') {
-                // leerzeichen ignorieren
+                // ignore blank
                 continue;
             }
 
@@ -105,7 +105,7 @@ class Scanner
 
                         case Token::T_NUMBER:
                         case Token::T_PCLOSE:
-                            // erlaubt 2(2) -> 2 * 2 | (2)(2) -> 2 * 2
+                            // allowed 2(2) -> 2 * 2 | (2)(2) -> 2 * 2
                             $this->tokens[] = new Token(Token::T_TIMES, '*');
                             break;
                     }
