@@ -122,7 +122,7 @@ class Scanner
                     break;
 
                 case Token::T_IDENT:
-                    if ($value == 'null') {
+                    if (strcasecmp($value, 'null') == 0) {
                         $tokenType = Token::T_NULL;
                         $value = null;
                     }

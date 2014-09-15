@@ -87,7 +87,7 @@ class Context
             throw new RuntimeError('run-time error: undefined operator handler "' . $op . '"');
         }
 
-        return (float) call_user_func_array($this->operatorHandlers[$op], array($lhsValue, $rhsValue));
+        return call_user_func_array($this->operatorHandlers[$op], array($lhsValue, $rhsValue));
     }
 
     /**
@@ -121,6 +121,9 @@ class Context
      */
     public function defOperator($operator, callable $func)
     {
+        if ($operator & Token::T_OPERATOR == 0) {
+            throw new Exception('unsupported operator');
+        }
         $this->operatorHandlers[$operator] = $func;
     }
 

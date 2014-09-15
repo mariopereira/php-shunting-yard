@@ -127,7 +127,8 @@ class Parser
                     $len -= $na - 1;
 
                     // Push the returned results, if any, back onto the stack.
-                    $this->stack[] = new Token(Token::T_NUMBER, $this->op($t->type, $lhs, $rhs, $ctx));
+                    $operationResult = $this->op($t->type, $lhs, $rhs, $ctx);
+                    $this->stack[] = new Token(is_null($operationResult) ? Token::T_NULL : Token::T_NUMBER, $operationResult);
                     break;
 
                 case Token::T_FUNCTION:
@@ -151,8 +152,9 @@ class Parser
 
         // If there is only one value in the stack
         // That value is the result of the calculation.
-        if (count($this->stack) === 1)
+        if (count($this->stack) === 1) {
             return array_pop($this->stack)->value;
+        }
 
         // If there are more values in the stack
         // (Error) The user input has too many values.
