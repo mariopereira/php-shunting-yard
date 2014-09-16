@@ -158,14 +158,16 @@ class Parser
 
         // If there are more values in the stack
         // (Error) The user input has too many values.
-        throw new RuntimeError('run-time error: too many values ​​in the stack');
+        throw new RuntimeError('run-time error: too many values in the stack');
     }
 
     protected function op($op, $lhs, $rhs, Context $ctx)
     {
         // If there is a custom operator handler function defined in the context, call it instead
         if ($ctx->hasCustomOperatorHandler($op)) {
-            return $ctx->execCustomOperatorHandler($op, $lhs->value, $rhs->value);
+            $lhsValue = is_object($lhs) ? $lhs->value : null;
+            $rhsValue = is_object($rhs) ? $rhs->value : null;
+            return $ctx->execCustomOperatorHandler($op, $lhsValue, $rhsValue);
         }
 
         if ($lhs !== null) {
@@ -204,13 +206,13 @@ class Parser
 
         switch ($op) {
             case Token::T_NOT:
-                return (float)!$rhs->value;
+                return is_null($rhs->value) ? null : (float)!$rhs->value;
 
             case Token::T_UNARY_MINUS:
-                return -$rhs->value;
+                return is_null($rhs->value) ? null : -$rhs->value;
 
             case Token::T_UNARY_PLUS:
-                return +$rhs->value;
+                return is_null($rhs->value) ? null : +$rhs->value;
         }
     }
 
