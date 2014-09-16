@@ -152,8 +152,11 @@ class Parser
 
         // If there is only one value in the stack
         // That value is the result of the calculation.
-        if (count($this->stack) === 1) {
+        if (count($this->stack) == 1) {
             return array_pop($this->stack)->value;
+        } elseif (count($this->stack) == 0) {
+            // Empty formula given
+            return null;
         }
 
         // If there are more values in the stack
