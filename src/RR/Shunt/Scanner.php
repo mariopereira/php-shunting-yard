@@ -146,7 +146,8 @@ class Scanner
     public function reset() { reset($this->tokens); } // call before reusing Scanner instance
     public function curr() { return current($this->tokens); }
     public function next() { return next($this->tokens); }
-    public function prev() { return prev($this->tokens); }
+	public function prev() { return prev($this->tokens); }
+	public function dump() { print_r($this->tokens); }
 
     public function peek()
     {
@@ -154,24 +155,5 @@ class Scanner
         prev($this->tokens);
 
         return $v;
-    }
-
-    public function dump($formatted = false) {
-
-        if (!$formatted) {
-            var_dump($this->tokens);
-        } else {
-            $clonedTokens = array();
-            foreach ($this->tokens as $token) {
-                if (is_object($token)) {
-                    $cloned_token = clone($token);
-                    $cloned_token->type .= ' ('.$cloned_token->getTypeName().')';
-                    $clonedTokens[] = $cloned_token;
-                } else {
-                    $clonedTokens[] = $token;
-                }
-            }
-            var_dump($clonedTokens);die;
-        }
     }
 }
