@@ -70,7 +70,7 @@ Define the following requirement in your composer.json file:
 ```json
 {
     "require": {
-        "pmishev/php-shunting-yard": "dev-master"
+        "falahati/php-shunting-yard": "dev-master"
     }
 }
 ```
