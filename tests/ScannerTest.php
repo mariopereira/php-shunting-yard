@@ -351,7 +351,7 @@ class ScannerTest extends \PHPUnit_Framework_TestCase
      */
     public function testForSyntaxErrorExceptionWithWrongInput()
     {
-        $term = '2&2';
+        $term = '2~2';
 
         $scanner = new Scanner($term);
     }
