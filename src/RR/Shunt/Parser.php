@@ -551,29 +551,37 @@ class Parser
             case Token::T_NOT:
             case Token::T_UNARY_PLUS:
             case Token::T_UNARY_MINUS:
-                return 5;
+                return 9;
 
             case Token::T_POW:
-                return 4;
+                return 8;
 
             case Token::T_TIMES:
             case Token::T_DIV:
             case Token::T_MOD:
-                return 3;
+                return 7;
 							
             case Token::T_PLUS:
             case Token::T_MINUS:
-                return 2;
+                return 6;
 				
-			case Token::T_AND:
-			case Token::T_OR:
-			case Token::T_XOR:
 			case Token::T_GREATER_EQUAL:
 			case Token::T_LESS_EQUAL:
 			case Token::T_GREATER:
 			case Token::T_LESS:
+				return 5;
+				
 			case Token::T_EQUAL:
 			case Token::T_NOT_EQUAL:
+				return 4;
+				
+			case Token::T_XOR:
+				return 3;
+				
+			case Token::T_OR:
+				return 2;
+
+			case Token::T_AND:
 				return 1;
         }
 
