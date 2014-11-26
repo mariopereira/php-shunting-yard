@@ -69,14 +69,4 @@ class Token
         $this->type  = $type;
         $this->value = $value;
     }
-
-    /**
-     * @return string The name of the constant matching the token type
-     */
-    public function getTypeName()
-    {
-        $constants = (new \ReflectionClass($this))->getConstants();
-        $flipped = array_flip($constants);
-        return $flipped[$this->type];
-    }
 }
