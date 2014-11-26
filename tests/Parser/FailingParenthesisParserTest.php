@@ -12,9 +12,9 @@ class FailingParenthesisParserTest extends \PHPUnit_Framework_TestCase
      */
     public function testParenthesisThrowsError()
     {
+		$this->expectOutputString(null);
         $equation = '()';
-
-        Parser::parse($equation);
+		return Parser::parse($equation);
     }
 
 }
