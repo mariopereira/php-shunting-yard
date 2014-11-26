@@ -51,7 +51,16 @@ class Token
           T_UNARY_PLUS  = 71, // + unsigned number (determined during parsing)
           T_UNARY_MINUS = 72, // - signed number (determined during parsing)
           T_NOT         = 73, // !
-          T_NULL        = 128; // null
+          T_NULL        = 128, // null
+		  T_GREATER_EQUAL = 256, // >=
+		  T_LESS_EQUAL	= 512, // <=
+	      T_GREATER		= 1024, // >
+		  T_LESS		= 2048, // <
+		  T_EQUAL		= 4096, // =
+		  T_NOT_EQUAL	= 8192, // <>
+		  T_AND			= 16384, // &
+		  T_OR			= 32768, // |
+		  T_XOR			= 65536; // ><
 
     public $type, $value, $argc = 0;
 
