@@ -1,12 +1,12 @@
 <?php
 
 /*!
- * PHP Shunting-yard Implementierung
+ * PHP Shunting-yard Implementation
  * Copyright 2012 - droptable <murdoc@raidrush.org>
  *
- * PHP 5.4 benötigt
+ * PHP 5.3 required
  *
- * Referenz: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
+ * Reference: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
  *
  * ----------------------------------------------------------------
  *
@@ -37,41 +37,104 @@ use RR\Shunt\Exception\RuntimeError;
 
 class Context
 {
-    protected $fnt = array(), $cst = array('PI' => M_PI, 'π' => M_PI);
+    protected $functions = array();
+    protected $constants = array('PI' => M_PI, 'π' => M_PI);
+    protected $operatorHandlers = array();
 
+    /**
+     * Call a user-defined custom function and returns the result
+     *
+     * @param $name The name of the function
+     * @param array $args The arguments to pass to the function
+     * @return float The result returned from the function
+     * @throws RuntimeError
+     */
     public function fn($name, array $args)
     {
-        if (!isset($this->fnt[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte funktion "' . $name . '"');
+        if (!isset($this->functions[$name])) {
+            throw new RuntimeError('run-time error: undefined function "' . $name . '"');
         }
 
-        return (float) call_user_func_array($this->fnt[$name], $args);
+        return (float) call_user_func_array($this->functions[$name], $args);
     }
 
+    /**
+     * Returns the value of a custom-defined constant
+     *
+     * @param $name
+     * @return mixed
+     * @throws RuntimeError
+     */
     public function cs($name)
     {
-        if (!isset($this->cst[$name])) {
-            throw new RuntimeError('laufzeit fehler: undefinierte konstante "' . $name . '"');
+        if (!isset($this->constants[$name])) {
+            throw new RuntimeError('run-time error: undefined constant "' . $name . '"');
         }
 
-        return $this->cst[$name];
+        return $this->constants[$name];
     }
 
+    /**
+     * @param $op Operator integer value (as defined in Token)
+     * @param $lhsValue The left-hand side operand
+     * @param $rhsValue The right-hand side operand
+     * @return float
+     * @throws RuntimeError
+     */
+    public function execCustomOperatorHandler($op, $lhsValue, $rhsValue)
+    {
+        if (!isset($this->operatorHandlers[$op])) {
+            throw new RuntimeError('run-time error: undefined operator handler "' . $op . '"');
+        }
+
+        return call_user_func_array($this->operatorHandlers[$op], array($lhsValue, $rhsValue));
+    }
+
+    /**
+     * Define a custom constant or a function
+     *
+     * @param $name Name of the constant or function
+     * @param mixed $value
+     * @param string $type
+     * @throws \Exception
+     */
     public function def($name, $value = null, $type = 'float')
     {
-        // einfacher wrapper
+        // wrapper for simple PHP functions
         if ($value === null) {
             $value = $name;
         }
 
         if (is_callable($value) && $type == 'float') {
-            $this->fnt[$name] = $value;
+            $this->functions[$name] = $value;
         } elseif (is_numeric($value) && $type == 'float') {
-            $this->cst[$name] = (float) $value;
+            $this->constants[$name] = (float) $value;
         } elseif (is_string($value) && $type == 'string') {
-            $this->cst[$name] = $value;
+            $this->constants[$name] = $value;
         } else {
-            throw new Exception('funktion oder nummer erwartet');
+            throw new Exception('function or number expected');
         }
+    }
+
+    /**
+     * Register custom handler function for an operator
+     */
+    public function defOperator($operator, callable $func)
+    {
+        if ($operator & Token::T_OPERATOR == 0) {
+            throw new Exception('unsupported operator');
+        }
+        $this->operatorHandlers[$operator] = $func;
+    }
+
+    /**
+     * Check whether there is a custom handler defined for an operator
+     *
+     * @param int $operator
+     * @return bool
+     */
+    public function hasCustomOperatorHandler($operator)
+    {
+        return isset($this->operatorHandlers[$operator]);
     }
 }

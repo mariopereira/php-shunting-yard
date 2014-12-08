@@ -1,12 +1,12 @@
 <?php
 
 /*!
- * PHP Shunting-yard Implementierung
+ * PHP Shunting-yard Implementation
  * Copyright 2012 - droptable <murdoc@raidrush.org>
  *
- * PHP 5.4 benötigt
+ * PHP 5.3 required
  *
- * Referenz: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
+ * Reference: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
  *
  * ----------------------------------------------------------------
  *
@@ -36,15 +36,25 @@ use RR\Shunt\Exception\SyntaxError;
 
 class Scanner
 {
-    //                  operatoren          nummern               wörter                  leerzeichen
-    const PATTERN = '/^([!,\+\-\*\/\^%\(\)]|\d*\.\d+|\d+\.\d*|\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \t]+)/';
+    //              operator_________________________________|number_______________|word____________________|space_
+	const PATTERN = '/^([<>]=|<>|><|[!,><=&\|\+\-\*\/\^%\(\)]|\d*\.\d+|\d+\.\d*|\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \t]+)/';
 
-    const ERR_EMPTY = 'leerer fund! (endlosschleife) in der nähe von: `%s`',
-        ERR_MATCH = 'syntax fehler in der nähe von `%s`';
+    const ERR_EMPTY = 'nothing found! (endless loop) near: `%s`';
+    const ERR_MATCH = 'syntax error near `%s`';
 
     protected $tokens = array( 0 );
 
-    protected $lookup = array(
+	protected $lookup = array(
+		'>=' => Token::T_GREATER_EQUAL,
+		'<=' => Token::T_LESS_EQUAL,
+		'<>' => Token::T_NOT_EQUAL,
+		'><' => Token::T_XOR,
+		'>' =>	Token::T_GREATER,
+		'<' =>	Token::T_LESS,
+		'=' =>	Token::T_EQUAL,
+		'&' =>	Token::T_AND,
+		'|' =>	Token::T_OR,
+		
         '+' => Token::T_PLUS,
         '-' => Token::T_MINUS,
         '/' => Token::T_DIV,
@@ -62,21 +72,25 @@ class Scanner
         $prev = new Token(Token::T_OPERATOR, 'noop');
 
         while (trim($input) !== '') {
+			
             if (!preg_match(self::PATTERN, $input, $match)) {
-                // syntax fehler
+                // syntax error
                 throw new SyntaxError(sprintf(self::ERR_MATCH, substr($input, 0, 10)));
             }
 
             if (empty($match[1]) && $match[1] !== '0') {
-                // leerer fund -> endlosschleife vermeiden
+                // nothing found -> avoid endless loop
                 throw new SyntaxError(sprintf(self::ERR_EMPTY, substr($input, 0, 10)));
             }
 
-            // aktuellen wert von input abziehen
+            // Remove the first matched token from the input, for the next iteration
             $input = substr($input, strlen($match[1]));
+			
+            // Get the value of the matched token
+            $value = trim($match[1]);
 
-            if (($value = trim($match[1])) === '') {
-                // leerzeichen ignorieren
+            // Ignore whitespace matches
+            if ($value === '') {
                 continue;
             }
 
@@ -88,13 +102,20 @@ class Scanner
                 continue;
             }
 
-            switch ($type = isset($this->lookup[$value]) ? $this->lookup[$value] : Token::T_IDENT) {
+            // Unless token is one of the predefined symbols, consider it an identifier token
+            $tokenType = isset($this->lookup[$value]) ? $this->lookup[$value] : Token::T_IDENT;
+
+            switch ($tokenType) {
                 case Token::T_PLUS:
-                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) $type = Token::T_UNARY_PLUS;
+                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) {
+                        $tokenType = Token::T_UNARY_PLUS;
+                    }
                     break;
 
                 case Token::T_MINUS:
-                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) $type = Token::T_UNARY_MINUS;
+                    if ($prev->type & Token::T_OPERATOR || $prev->type == Token::T_POPEN || $prev->type == Token::T_COMMA) {
+                        $tokenType = Token::T_UNARY_MINUS;
+                    }
                     break;
 
                 case Token::T_POPEN:
@@ -105,23 +126,28 @@ class Scanner
 
                         case Token::T_NUMBER:
                         case Token::T_PCLOSE:
-                            // erlaubt 2(2) -> 2 * 2 | (2)(2) -> 2 * 2
+                            // allowed 2(2) -> 2 * 2 | (2)(2) -> 2 * 2
                             $this->tokens[] = new Token(Token::T_TIMES, '*');
                             break;
                     }
-
                     break;
+
+                case Token::T_IDENT:
+                    if (strcasecmp($value, 'null') == 0) {
+                        $tokenType = Token::T_NULL;
+                        $value = null;
+                    }
             }
 
-            $this->tokens[] = $prev = new Token($type, $value);
+            $this->tokens[] = $prev = new Token($tokenType, $value);
         }
     }
 
     public function reset() { reset($this->tokens); } // call before reusing Scanner instance
     public function curr() { return current($this->tokens); }
     public function next() { return next($this->tokens); }
-    public function prev() { return prev($this->tokens); }
-    public function dump() { print_r($this->tokens); }
+	public function prev() { return prev($this->tokens); }
+	public function dump() { print_r($this->tokens); }
 
     public function peek()
     {

@@ -1,7 +1,5 @@
 ## PHP Shunting Yard Implementation
 
-Build status: [![Build status](https://travis-ci.org/andig/php-shunting-yard.png)](https://travis-ci.org/andig/php-shunting-yard)
-
 ### Example
 
 Simple equation parsing
@@ -27,6 +25,20 @@ $equation = '3 + bar(4, 2) / (abs(-1) - foo) ^ 2 ^ 3';
 $result = Parser::parse($equation, $ctx);
 echo $result; //3.0001220703125
 ```
+
+Test a condition
+```php
+use RR\Shunt\Parser;
+use RR\Shunt\Context;
+
+$ctx = new Context();
+$ctx->def('foo', 5); // constant "foo" with value "5"
+
+$equation = '(foo > 3) & (foo < 6)';
+$result = Parser::parse($equation, $ctx);
+echo $result; //true
+```
+
 Re-run parsed expression on multiple inputs
 ```php
 use RR\Shunt\Parser;
@@ -48,7 +60,7 @@ echo $result; // 4
 
 ### Authors
 
-Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from https://github.com/andig/php-shunting-yard. 
+Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from https://github.com/andig/php-shunting-yard, https://github.com/pmishev/php-shunting-yard and https://github.com/falahati/php-shunting-yard. 
 Test cases and refactoring for composer/packagist by https://github.com/sergej-kurakin/php-shunting-yard.
 
 ### Installation Via Composer
@@ -58,7 +70,7 @@ Define the following requirement in your composer.json file:
 ```json
 {
     "require": {
-        "andig/php-shunting-yard": "dev-master"
+        "falahati/php-shunting-yard": "dev-master"
     }
 }
 ```
@@ -67,6 +79,21 @@ Class loading
 
 ```php
 require_once "vendor/autoload.php";
+```
+
+
+### Manual Installation
+
+Class loading
+
+```php
+require_once "RR/Shunt/Context.php";
+require_once "RR/Shunt/Parser.php";
+require_once "RR/Shunt/Scanner.php";
+require_once "RR/Shunt/Token.php";
+require_once "RR/Shunt/Exception/ParseError.php";
+require_once "RR/Shunt/Exception/RuntimeError.php";
+require_once "RR/Shunt/Exception/SyntaxError.php";
 ```
 
 

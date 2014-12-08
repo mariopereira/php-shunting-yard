@@ -1,12 +1,12 @@
 <?php
 
 /*!
- * PHP Shunting-yard Implementierung
+ * PHP Shunting-yard Implementation
  * Copyright 2012 - droptable <murdoc@raidrush.org>
  *
- * PHP 5.4 benötigt
+ * PHP 5.3 required
  *
- * Referenz: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
+ * Reference: <http://en.wikipedia.org/wiki/Shunting-yard_algorithm>
  *
  * ----------------------------------------------------------------
  *
@@ -37,10 +37,10 @@ use RR\Shunt\Exception\ParseError;
 
 class Parser
 {
-    const ST_1 = 1, // wartet auf operand oder unäre vorzeichen
-          ST_2 = 2; // wartet auf operator
+    const WAITING_FOR_OPERAND_OR_UNARY_SIGN = 1,    // waiting for operand or unary sign
+          WAITING_FOR_OPERATOR = 2;                 // waiting for operator
 
-    protected $scanner, $state = self::ST_1;
+    protected $scanner, $state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
     protected $queue, $stack;
     protected $queueCopy;
 
@@ -48,11 +48,11 @@ class Parser
     {
         $this->scanner = $scanner;
 
-        // alloc
+        // init
         $this->queue = array();
         $this->stack = array();
 
-        // queue erzeugen
+        // create queue
         while (($t = $this->scanner->next()) !== false) {
             $this->handle($t);
         }
@@ -61,7 +61,7 @@ class Parser
         // While there are still operator tokens in the stack:
         while ($t = array_pop($this->stack)) {
             if ($t->type === Token::T_POPEN || $t->type === Token::T_PCLOSE)
-                throw new ParseError('parser fehler: fehlerhafte verschachtelung von `(` und `)`');
+                throw new ParseError('parser error: incorrect nesting of `(` and `)`');
 
             $this->queue[] = $t;
         }
@@ -87,17 +87,27 @@ class Parser
         while ($t = array_shift($this->queue)) {
             switch ($t->type) {
                 case Token::T_NUMBER:
+                case Token::T_NULL:
                 case Token::T_IDENT:
-                    // wert einer konstanten ermitteln
+                    // determine constant value
                     if ($t->type === Token::T_IDENT)
                         $t = new Token(Token::T_NUMBER, $ctx->cs($t->value));
 
-                    // If the token is a value or identifier
+                    // If the token is a value, null or identifier
                     // Push it onto the stack.
                     $this->stack[] = $t;
                     ++$len;
                     break;
-
+				
+				case Token::T_AND:
+				case Token::T_OR:
+				case Token::T_XOR:
+				case Token::T_GREATER_EQUAL:
+				case Token::T_LESS_EQUAL:
+				case Token::T_GREATER:
+				case Token::T_LESS:
+				case Token::T_EQUAL:
+				case Token::T_NOT_EQUAL:			
                 case Token::T_PLUS:
                 case Token::T_MINUS:
                 case Token::T_UNARY_PLUS:
@@ -112,7 +122,7 @@ class Parser
 
                     // If there are fewer than n values on the stack
                     if ($len < $na)
-                        throw new RuntimeError('laufzeit fehler: zu wenig paramter für operator "' . $t->value . '" (' . $na . ' -> ' . $len . ')');
+                        throw new RuntimeError('run-time error: too few parameters for operator "' . $t->value . '" (' . $na . ' -> ' . $len . ')');
 
                     $rhs = array_pop($this->stack);
                     $lhs = null;
@@ -126,7 +136,8 @@ class Parser
                     $len -= $na - 1;
 
                     // Push the returned results, if any, back onto the stack.
-                    $this->stack[] = new Token(Token::T_NUMBER, $this->op($t->type, $lhs, $rhs));
+                    $operationResult = $this->op($t->type, $lhs, $rhs, $ctx);
+                    $this->stack[] = new Token(is_null($operationResult) ? Token::T_NULL : Token::T_NUMBER, $operationResult);
                     break;
 
                 case Token::T_FUNCTION:
@@ -144,27 +155,103 @@ class Parser
                     break;
 
                 default:
-                    throw new RuntimeError('laufzeit fehler: unerwarteter token `' . $t->value . '`');
+                    throw new RuntimeError('run-time error: unexpected token `' . $t->value . '`');
             }
         }
 
         // If there is only one value in the stack
         // That value is the result of the calculation.
-        if (count($this->stack) === 1)
+        if (count($this->stack) == 1) {
             return array_pop($this->stack)->value;
+        } elseif (count($this->stack) == 0) {
+            // Empty formula given
+            return null;
+        }
 
         // If there are more values in the stack
         // (Error) The user input has too many values.
-        throw new RuntimeError('laufzeit fehler: zu viele werte im stack');
+        throw new RuntimeError('run-time error: too many values in the stack');
     }
 
-    protected function op($op, $lhs, $rhs)
+    protected function op($op, $lhs, $rhs, Context $ctx)
     {
+        // If there is a custom operator handler function defined in the context, call it instead
+        if ($ctx->hasCustomOperatorHandler($op)) {
+            $lhsValue = is_object($lhs) ? $lhs->value : null;
+            $rhsValue = is_object($rhs) ? $rhs->value : null;
+            return $ctx->execCustomOperatorHandler($op, $lhsValue, $rhsValue);
+        }
+
         if ($lhs !== null) {
             $lhs = $lhs->value;
             $rhs = $rhs->value;
-
+							
+			switch  ($op) 
+			{
+				case Token::T_GREATER_EQUAL:
+				case Token::T_LESS_EQUAL:
+				case Token::T_GREATER:
+				case Token::T_LESS:
+				case Token::T_PLUS:
+				case Token::T_MINUS:
+				case Token::T_TIMES:
+				case Token::T_DIV:
+				case Token::T_MOD:
+				case Token::T_POW:
+					if (is_bool($lhs) && is_bool($rhs))
+					{
+						throw new RuntimeError('run-time error: trying to do a number only operation over two booleans');
+					} 
+					else if (is_bool($lhs) || is_bool($rhs))
+					{
+						throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
+					}
+					break;
+				case Token::T_EQUAL:
+				case Token::T_NOT_EQUAL:
+					if (is_bool($lhs) ^ is_bool($rhs))
+					{
+						throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
+					}
+					break;
+				case Token::T_AND:
+				case Token::T_OR:
+				case Token::T_XOR:
+					if (!is_bool($lhs) || !is_bool($rhs))
+					{
+						throw new RuntimeError('run-time error: trying to do a boolean only operation over two numbers');
+					}
+					break;
+			}
+			
             switch ($op) {
+				case Token::T_AND:
+					return $lhs && $rhs;
+					
+				case Token::T_OR:
+					return $lhs || $rhs;
+					
+				case Token::T_XOR:
+					return $lhs ^ $rhs;
+					
+				case Token::T_GREATER_EQUAL:
+					return $lhs >= $rhs;
+					
+				case Token::T_LESS_EQUAL:
+					return $lhs <= $rhs;
+					
+				case Token::T_GREATER:
+					return $lhs > $rhs;
+					
+				case Token::T_LESS:
+					return $lhs < $rhs;
+					
+				case Token::T_EQUAL:
+					return $lhs == $rhs;
+				
+				case Token::T_NOT_EQUAL:
+					return $lhs != $rhs;
+					
                 case Token::T_PLUS:
                     return $lhs + $rhs;
 
@@ -176,15 +263,14 @@ class Parser
 
                 case Token::T_DIV:
                     if ($rhs === 0.)
-                        throw new RuntimeError('laufzeit fehler: teilung durch 0');
+                        throw new RuntimeError('run-time error: division by zero');
 
                     return $lhs / $rhs;
 
                 case Token::T_MOD:
                     if ($rhs === 0.)
-                        throw new RuntimeError('laufzeit fehler: rest-teilung durch 0');
+                        throw new RuntimeError('run-time error: rest-division by zero');
 
-                    // php (bzw. c) kann hier nur mit ganzzahlen umgehen
                     return (float)$lhs % $rhs;
 
                 case Token::T_POW:
@@ -196,20 +282,30 @@ class Parser
         }
 
         switch ($op) {
+				
             case Token::T_NOT:
-                return (float)!$rhs->value;
+                return is_null($rhs->value) ? null : (float)!$rhs->value;
 
             case Token::T_UNARY_MINUS:
-                return -$rhs->value;
+                return is_null($rhs->value) ? null : -$rhs->value;
 
             case Token::T_UNARY_PLUS:
-                return +$rhs->value;
+                return is_null($rhs->value) ? null : +$rhs->value;
         }
     }
 
     protected function argc(Token $t)
     {
-        switch ($t->type) {
+		switch ($t->type) {
+			case Token::T_AND:
+			case Token::T_OR:
+			case Token::T_XOR:
+			case Token::T_GREATER_EQUAL:
+			case Token::T_LESS_EQUAL:
+			case Token::T_GREATER:
+			case Token::T_LESS:
+			case Token::T_EQUAL:
+			case Token::T_NOT_EQUAL:
             case Token::T_PLUS:
             case Token::T_MINUS:
             case Token::T_TIMES:
@@ -274,10 +370,11 @@ class Parser
     {
         switch ($t->type) {
             case Token::T_NUMBER:
+            case Token::T_NULL:
             case Token::T_IDENT:
-                // If the token is a number (identifier), then add it to the output queue.
+                // If the token is a number, NULL or identifier, then add it to the output queue.
                 $this->queue[] = $t;
-                $this->state = self::ST_2;
+                $this->state = self::WAITING_FOR_OPERATOR;
                 break;
 
             case Token::T_FUNCTION:
@@ -305,11 +402,20 @@ class Parser
                 // If no left parentheses are encountered, either the separator was misplaced
                 // or parentheses were mismatched.
                 if ($pe !== true)
-                    throw new ParseError('parser fehler: vermisster token `(` oder fehlplazierter token `,`');
+                    throw new ParseError('parser error: missing token `(` or misplaced token `,`');
 
                 break;
 
             // If the token is an operator, op1, then:
+			case Token::T_AND:
+			case Token::T_OR:
+			case Token::T_XOR:
+			case Token::T_GREATER_EQUAL:
+			case Token::T_LESS_EQUAL:
+			case Token::T_GREATER:
+			case Token::T_LESS:
+			case Token::T_EQUAL:
+			case Token::T_NOT_EQUAL:
             case Token::T_PLUS:
             case Token::T_MINUS:
             case Token::T_UNARY_PLUS:
@@ -333,6 +439,15 @@ class Parser
                         default:
                             break 2;
 
+						case Token::T_AND:
+						case Token::T_OR:
+						case Token::T_XOR:
+						case Token::T_GREATER_EQUAL:
+						case Token::T_LESS_EQUAL:
+						case Token::T_GREATER:
+						case Token::T_LESS:
+						case Token::T_EQUAL:
+						case Token::T_NOT_EQUAL:
                         case Token::T_PLUS:
                         case Token::T_MINUS:
                         case Token::T_UNARY_PLUS:
@@ -355,13 +470,13 @@ class Parser
 
                 // push op1 onto the stack.
                 $this->stack[] = $t;
-                $this->state = self::ST_1;
+                $this->state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
                 break;
 
             case Token::T_POPEN:
                 // If the token is a left parenthesis, then push it onto the stack.
                 $this->stack[] = $t;
-                $this->state = self::ST_1;
+                $this->state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
                 break;
 
             // If the token is a right parenthesis:
@@ -382,23 +497,34 @@ class Parser
 
                 // If the stack runs out without finding a left parenthesis, then there are mismatched parentheses.
                 if ($pe !== true)
-                    throw new ParseError('parser fehler: unerwarteter token `)`');
+                    throw new ParseError('parser error: unexpected token `)`');
 
                 // If the token at the top of the stack is a function token, pop it onto the output queue.
                 if (($t = end($this->stack)) && $t->type === Token::T_FUNCTION)
                     $this->queue[] = array_pop($this->stack);
 
-                $this->state = self::ST_2;
+                $this->state = self::WAITING_FOR_OPERATOR;
                 break;
 
             default:
-                throw new ParseError('parser fehler: unbekannter token "' . $t->value . '"');
+                throw new ParseError('parser error: unknown token "' . $t->value . '"');
         }
     }
 
     protected function assoc(Token $t)
     {
-        switch ($t->type) {
+		switch ($t->type) {
+			case Token::T_AND:
+			case Token::T_OR:
+			case Token::T_XOR:
+			
+			case Token::T_GREATER_EQUAL:
+			case Token::T_LESS_EQUAL:
+			case Token::T_GREATER:
+			case Token::T_LESS:
+			case Token::T_EQUAL:
+			case Token::T_NOT_EQUAL:
+			
             case Token::T_TIMES:
             case Token::T_DIV:
             case Token::T_MOD:
@@ -415,7 +541,7 @@ class Parser
                 return 2; //rtl
         }
 
-        // ggf. erweitern :-)
+        // possibly expand :-)
         return 0; //nassoc
     }
 
@@ -425,19 +551,38 @@ class Parser
             case Token::T_NOT:
             case Token::T_UNARY_PLUS:
             case Token::T_UNARY_MINUS:
-                return 4;
+                return 9;
 
             case Token::T_POW:
-                return 3;
+                return 8;
 
             case Token::T_TIMES:
             case Token::T_DIV:
             case Token::T_MOD:
-                return 2;
-
+                return 7;
+							
             case Token::T_PLUS:
             case Token::T_MINUS:
-                return 1;
+                return 6;
+				
+			case Token::T_GREATER_EQUAL:
+			case Token::T_LESS_EQUAL:
+			case Token::T_GREATER:
+			case Token::T_LESS:
+				return 5;
+				
+			case Token::T_EQUAL:
+			case Token::T_NOT_EQUAL:
+				return 4;
+				
+			case Token::T_XOR:
+				return 3;
+				
+			case Token::T_OR:
+				return 2;
+
+			case Token::T_AND:
+				return 1;
         }
 
         return 0;
