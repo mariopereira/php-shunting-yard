@@ -346,14 +346,17 @@ class Parser
 
     protected function fargs($fn)
     {
-        $argc = 0;
+        $argc = $parenthesis = 0;
         $this->handle($this->scanner->next()); // '('
 
         if ($this->scanner->peek()) { // more tokens?
             while ($t = $this->scanner->next()) {
                 $this->handle($t);
 
-                if ($t->type === Token::T_PCLOSE)
+                // nested parenthesis inside function calls
+                if ($t->type === Token::T_POPEN)
+                    $parenthesis++;
+                elseif ($t->type === Token::T_PCLOSE && $parenthesis-- === 0)
                     break;
 
                 $argc = max($argc, 1); // at least 1 arg if bracket not closed immediately
