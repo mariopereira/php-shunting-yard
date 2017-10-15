@@ -5,7 +5,7 @@ namespace tests\Parser;
 use RR\Shunt\Parser;
 use RR\Shunt\Exception\RuntimeError;
 
-class FailingParenthesisParserTest extends \PHPUnit_Framework_TestCase
+class FailingParenthesisParserTest extends \PHPUnit\Framework\TestCase
 {
 	
     public function testParenthesisThrowsError()

@@ -5,7 +5,7 @@ namespace tests\Parser;
 use RR\Shunt\Context;
 use RR\Shunt\Parser;
 
-class ConstantsParserTest extends \PHPUnit_Framework_TestCase
+class ConstantsParserTest extends \PHPUnit\Framework\TestCase
 {
 
     /**

@@ -6,7 +6,7 @@ use RR\Shunt\Scanner;
 use RR\Shunt\Token;
 use RR\Shunt\Exception\SyntaxError;
 
-class ScannerTest extends \PHPUnit_Framework_TestCase
+class ScannerTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @param $term

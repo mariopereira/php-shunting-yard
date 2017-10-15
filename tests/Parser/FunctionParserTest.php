@@ -6,7 +6,7 @@ use RR\Shunt\Parser;
 use RR\Shunt\Context;
 
 
-class FunctionParserTest extends \PHPUnit_Framework_TestCase
+class FunctionParserTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testFunctionCallWithOneParam()
