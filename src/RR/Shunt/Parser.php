@@ -70,14 +70,14 @@ class Parser
         $this->queueCopy = $this->queue;
       }
 
-      private function reset()
-      {
+    private function reset()
+    {
         $this->queue = $this->queueCopy;
         $this->scanner->reset();
-      }
+    }
 
-      public function reduce(Context $ctx)
-      {
+    public function reduce(Context $ctx)
+    {
         $this->reset();
         $this->stack = array();
         $len = 0;
@@ -90,8 +90,14 @@ class Parser
                 case Token::T_NULL:
                 case Token::T_IDENT:
                     // determine constant value
-                    if ($t->type === Token::T_IDENT)
-                        $t = new Token(Token::T_NUMBER, $ctx->cs($t->value));
+                    if ($t->type === Token::T_IDENT) {
+                        $value = $ctx->cs($t->value);
+                        if ($value === 'null') {
+                            $t = new Token(Token::T_NULL, null);
+                        } else {
+                            $t = new Token(Token::T_NUMBER, $value);
+                        }
+                    }
 
                     // If the token is a value, null or identifier
                     // Push it onto the stack.
