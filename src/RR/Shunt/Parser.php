@@ -583,14 +583,14 @@ class Parser
 			case Token::T_EQUAL:
 			case Token::T_NOT_EQUAL:
 				return 4;
-				
+
+            case Token::T_AND:
+                return 3;
+
 			case Token::T_XOR:
-				return 3;
+				return 2;
 				
 			case Token::T_OR:
-				return 2;
-
-			case Token::T_AND:
 				return 1;
         }
 
