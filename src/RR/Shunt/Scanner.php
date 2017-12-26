@@ -37,24 +37,24 @@ use RR\Shunt\Exception\SyntaxError;
 class Scanner
 {
     //              operator_________________________________|number_______________|word____________________|space_
-	const PATTERN = '/^([<>]=|<>|><|[!,><=&\|\+\-\*\/\^%\(\)]|\d*\.\d+|\d+\.\d*|\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \t]+)/';
+    const PATTERN = '/^([<>]=|<>|><|[!,><=&\|\+\-\*\/\^%\(\)]|\d*\.\d+|\d+\.\d*|\d+|[a-z_A-Zπ]+[a-z_A-Z0-9]*|[ \t]+)/';
 
     const ERR_EMPTY = 'nothing found! (endless loop) near: `%s`';
     const ERR_MATCH = 'syntax error near `%s`';
 
     protected $tokens = array( 0 );
 
-	protected $lookup = array(
-		'>=' => Token::T_GREATER_EQUAL,
-		'<=' => Token::T_LESS_EQUAL,
-		'<>' => Token::T_NOT_EQUAL,
-		'><' => Token::T_XOR,
-		'>' =>	Token::T_GREATER,
-		'<' =>	Token::T_LESS,
-		'=' =>	Token::T_EQUAL,
-		'&' =>	Token::T_AND,
-		'|' =>	Token::T_OR,
-		
+    protected $lookup = array(
+        '>=' => Token::T_GREATER_EQUAL,
+        '<=' => Token::T_LESS_EQUAL,
+        '<>' => Token::T_NOT_EQUAL,
+        '><' => Token::T_XOR,
+        '>' =>	Token::T_GREATER,
+        '<' =>	Token::T_LESS,
+        '=' =>	Token::T_EQUAL,
+        '&' =>	Token::T_AND,
+        '|' =>	Token::T_OR,
+
         '+' => Token::T_PLUS,
         '-' => Token::T_MINUS,
         '/' => Token::T_DIV,
@@ -72,7 +72,7 @@ class Scanner
         $prev = new Token(Token::T_OPERATOR, 'noop');
 
         while (trim($input) !== '') {
-			
+
             if (!preg_match(self::PATTERN, $input, $match)) {
                 // syntax error
                 throw new SyntaxError(sprintf(self::ERR_MATCH, substr($input, 0, 10)));
@@ -85,7 +85,7 @@ class Scanner
 
             // Remove the first matched token from the input, for the next iteration
             $input = substr($input, strlen($match[1]));
-			
+
             // Get the value of the matched token
             $value = trim($match[1]);
 
@@ -146,8 +146,8 @@ class Scanner
     public function reset() { reset($this->tokens); } // call before reusing Scanner instance
     public function curr() { return current($this->tokens); }
     public function next() { return next($this->tokens); }
-	public function prev() { return prev($this->tokens); }
-	public function dump() { print_r($this->tokens); }
+    public function prev() { return prev($this->tokens); }
+    public function dump() { print_r($this->tokens); }
 
     public function peek()
     {
