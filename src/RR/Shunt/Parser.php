@@ -68,16 +68,16 @@ class Parser
 
         // maintain copy of queue
         $this->queueCopy = $this->queue;
-      }
+    }
 
-      private function reset()
-      {
+    private function reset()
+    {
         $this->queue = $this->queueCopy;
         $this->scanner->reset();
-      }
+    }
 
-      public function reduce(Context $ctx)
-      {
+    public function reduce(Context $ctx)
+    {
         $this->reset();
         $this->stack = array();
         $len = 0;
@@ -90,24 +90,30 @@ class Parser
                 case Token::T_NULL:
                 case Token::T_IDENT:
                     // determine constant value
-                    if ($t->type === Token::T_IDENT)
-                        $t = new Token(Token::T_NUMBER, $ctx->cs($t->value));
+                    if ($t->type === Token::T_IDENT) {
+                        $value = $ctx->cs($t->value);
+                        if ($value === 'null') {
+                            $t = new Token(Token::T_NULL, null);
+                        } else {
+                            $t = new Token(Token::T_NUMBER, $value);
+                        }
+                    }
 
                     // If the token is a value, null or identifier
                     // Push it onto the stack.
                     $this->stack[] = $t;
                     ++$len;
                     break;
-				
-				case Token::T_AND:
-				case Token::T_OR:
-				case Token::T_XOR:
-				case Token::T_GREATER_EQUAL:
-				case Token::T_LESS_EQUAL:
-				case Token::T_GREATER:
-				case Token::T_LESS:
-				case Token::T_EQUAL:
-				case Token::T_NOT_EQUAL:			
+
+                case Token::T_AND:
+                case Token::T_OR:
+                case Token::T_XOR:
+                case Token::T_GREATER_EQUAL:
+                case Token::T_LESS_EQUAL:
+                case Token::T_GREATER:
+                case Token::T_LESS:
+                case Token::T_EQUAL:
+                case Token::T_NOT_EQUAL:
                 case Token::T_PLUS:
                 case Token::T_MINUS:
                 case Token::T_UNARY_PLUS:
@@ -185,73 +191,73 @@ class Parser
         if ($lhs !== null) {
             $lhs = $lhs->value;
             $rhs = $rhs->value;
-							
-			switch  ($op) 
-			{
-				case Token::T_GREATER_EQUAL:
-				case Token::T_LESS_EQUAL:
-				case Token::T_GREATER:
-				case Token::T_LESS:
-				case Token::T_PLUS:
-				case Token::T_MINUS:
-				case Token::T_TIMES:
-				case Token::T_DIV:
-				case Token::T_MOD:
-				case Token::T_POW:
-					if (is_bool($lhs) && is_bool($rhs))
-					{
-						throw new RuntimeError('run-time error: trying to do a number only operation over two booleans');
-					} 
-					else if (is_bool($lhs) || is_bool($rhs))
-					{
-						throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
-					}
-					break;
-				case Token::T_EQUAL:
-				case Token::T_NOT_EQUAL:
-					if (is_bool($lhs) ^ is_bool($rhs))
-					{
-						throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
-					}
-					break;
-				case Token::T_AND:
-				case Token::T_OR:
-				case Token::T_XOR:
-					if (!is_bool($lhs) || !is_bool($rhs))
-					{
-						throw new RuntimeError('run-time error: trying to do a boolean only operation over two numbers');
-					}
-					break;
-			}
-			
+
+            switch  ($op)
+            {
+                case Token::T_GREATER_EQUAL:
+                case Token::T_LESS_EQUAL:
+                case Token::T_GREATER:
+                case Token::T_LESS:
+                case Token::T_PLUS:
+                case Token::T_MINUS:
+                case Token::T_TIMES:
+                case Token::T_DIV:
+                case Token::T_MOD:
+                case Token::T_POW:
+                    if (is_bool($lhs) && is_bool($rhs))
+                    {
+                        throw new RuntimeError('run-time error: trying to do a number only operation over two booleans');
+                    }
+                    else if (is_bool($lhs) || is_bool($rhs))
+                    {
+                        throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
+                    }
+                    break;
+                case Token::T_EQUAL:
+                case Token::T_NOT_EQUAL:
+                    if (is_bool($lhs) ^ is_bool($rhs))
+                    {
+                        throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
+                    }
+                    break;
+                case Token::T_AND:
+                case Token::T_OR:
+                case Token::T_XOR:
+                    if (!is_bool($lhs) || !is_bool($rhs))
+                    {
+                        throw new RuntimeError('run-time error: trying to do a boolean only operation over two numbers');
+                    }
+                    break;
+            }
+
             switch ($op) {
-				case Token::T_AND:
-					return $lhs && $rhs;
-					
-				case Token::T_OR:
-					return $lhs || $rhs;
-					
-				case Token::T_XOR:
-					return $lhs ^ $rhs;
-					
-				case Token::T_GREATER_EQUAL:
-					return $lhs >= $rhs;
-					
-				case Token::T_LESS_EQUAL:
-					return $lhs <= $rhs;
-					
-				case Token::T_GREATER:
-					return $lhs > $rhs;
-					
-				case Token::T_LESS:
-					return $lhs < $rhs;
-					
-				case Token::T_EQUAL:
-					return $lhs == $rhs;
-				
-				case Token::T_NOT_EQUAL:
-					return $lhs != $rhs;
-					
+                case Token::T_AND:
+                    return $lhs && $rhs;
+
+                case Token::T_OR:
+                    return $lhs || $rhs;
+
+                case Token::T_XOR:
+                    return $lhs ^ $rhs;
+
+                case Token::T_GREATER_EQUAL:
+                    return $lhs >= $rhs;
+
+                case Token::T_LESS_EQUAL:
+                    return $lhs <= $rhs;
+
+                case Token::T_GREATER:
+                    return $lhs > $rhs;
+
+                case Token::T_LESS:
+                    return $lhs < $rhs;
+
+                case Token::T_EQUAL:
+                    return $lhs == $rhs;
+
+                case Token::T_NOT_EQUAL:
+                    return $lhs != $rhs;
+
                 case Token::T_PLUS:
                     return $lhs + $rhs;
 
@@ -282,7 +288,7 @@ class Parser
         }
 
         switch ($op) {
-				
+
             case Token::T_NOT:
                 return is_null($rhs->value) ? null : (float)!$rhs->value;
 
@@ -296,16 +302,16 @@ class Parser
 
     protected function argc(Token $t)
     {
-		switch ($t->type) {
-			case Token::T_AND:
-			case Token::T_OR:
-			case Token::T_XOR:
-			case Token::T_GREATER_EQUAL:
-			case Token::T_LESS_EQUAL:
-			case Token::T_GREATER:
-			case Token::T_LESS:
-			case Token::T_EQUAL:
-			case Token::T_NOT_EQUAL:
+        switch ($t->type) {
+            case Token::T_AND:
+            case Token::T_OR:
+            case Token::T_XOR:
+            case Token::T_GREATER_EQUAL:
+            case Token::T_LESS_EQUAL:
+            case Token::T_GREATER:
+            case Token::T_LESS:
+            case Token::T_EQUAL:
+            case Token::T_NOT_EQUAL:
             case Token::T_PLUS:
             case Token::T_MINUS:
             case Token::T_TIMES:
@@ -410,15 +416,15 @@ class Parser
                 break;
 
             // If the token is an operator, op1, then:
-			case Token::T_AND:
-			case Token::T_OR:
-			case Token::T_XOR:
-			case Token::T_GREATER_EQUAL:
-			case Token::T_LESS_EQUAL:
-			case Token::T_GREATER:
-			case Token::T_LESS:
-			case Token::T_EQUAL:
-			case Token::T_NOT_EQUAL:
+            case Token::T_AND:
+            case Token::T_OR:
+            case Token::T_XOR:
+            case Token::T_GREATER_EQUAL:
+            case Token::T_LESS_EQUAL:
+            case Token::T_GREATER:
+            case Token::T_LESS:
+            case Token::T_EQUAL:
+            case Token::T_NOT_EQUAL:
             case Token::T_PLUS:
             case Token::T_MINUS:
             case Token::T_UNARY_PLUS:
@@ -442,15 +448,15 @@ class Parser
                         default:
                             break 2;
 
-						case Token::T_AND:
-						case Token::T_OR:
-						case Token::T_XOR:
-						case Token::T_GREATER_EQUAL:
-						case Token::T_LESS_EQUAL:
-						case Token::T_GREATER:
-						case Token::T_LESS:
-						case Token::T_EQUAL:
-						case Token::T_NOT_EQUAL:
+                        case Token::T_AND:
+                        case Token::T_OR:
+                        case Token::T_XOR:
+                        case Token::T_GREATER_EQUAL:
+                        case Token::T_LESS_EQUAL:
+                        case Token::T_GREATER:
+                        case Token::T_LESS:
+                        case Token::T_EQUAL:
+                        case Token::T_NOT_EQUAL:
                         case Token::T_PLUS:
                         case Token::T_MINUS:
                         case Token::T_UNARY_PLUS:
@@ -516,18 +522,18 @@ class Parser
 
     protected function assoc(Token $t)
     {
-		switch ($t->type) {
-			case Token::T_AND:
-			case Token::T_OR:
-			case Token::T_XOR:
-			
-			case Token::T_GREATER_EQUAL:
-			case Token::T_LESS_EQUAL:
-			case Token::T_GREATER:
-			case Token::T_LESS:
-			case Token::T_EQUAL:
-			case Token::T_NOT_EQUAL:
-			
+        switch ($t->type) {
+            case Token::T_AND:
+            case Token::T_OR:
+            case Token::T_XOR:
+
+            case Token::T_GREATER_EQUAL:
+            case Token::T_LESS_EQUAL:
+            case Token::T_GREATER:
+            case Token::T_LESS:
+            case Token::T_EQUAL:
+            case Token::T_NOT_EQUAL:
+
             case Token::T_TIMES:
             case Token::T_DIV:
             case Token::T_MOD:
@@ -563,29 +569,29 @@ class Parser
             case Token::T_DIV:
             case Token::T_MOD:
                 return 7;
-							
+
             case Token::T_PLUS:
             case Token::T_MINUS:
                 return 6;
-				
-			case Token::T_GREATER_EQUAL:
-			case Token::T_LESS_EQUAL:
-			case Token::T_GREATER:
-			case Token::T_LESS:
-				return 5;
-				
-			case Token::T_EQUAL:
-			case Token::T_NOT_EQUAL:
-				return 4;
-				
-			case Token::T_XOR:
-				return 3;
-				
-			case Token::T_OR:
-				return 2;
 
-			case Token::T_AND:
-				return 1;
+            case Token::T_GREATER_EQUAL:
+            case Token::T_LESS_EQUAL:
+            case Token::T_GREATER:
+            case Token::T_LESS:
+                return 5;
+
+            case Token::T_EQUAL:
+            case Token::T_NOT_EQUAL:
+                return 4;
+
+            case Token::T_AND:
+                return 3;
+
+            case Token::T_XOR:
+                return 2;
+
+            case Token::T_OR:
+                return 1;
         }
 
         return 0;
