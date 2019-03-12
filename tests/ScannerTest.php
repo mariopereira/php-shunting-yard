@@ -346,11 +346,10 @@ class ScannerTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    /**
-     * @expectedException \RR\Shunt\Exception\SyntaxError
-     */
     public function testForSyntaxErrorExceptionWithWrongInput()
     {
+        $this->expectException(\RR\Shunt\Exception\SyntaxError::class);
+
         $term = '2~2';
 
         $scanner = new Scanner($term);

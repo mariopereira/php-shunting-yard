@@ -34,4 +34,6 @@ namespace RR\Shunt\Exception;
 
 use Exception;
 
-class RuntimeError extends Exception {}
+class RuntimeError extends Exception
+{
+}

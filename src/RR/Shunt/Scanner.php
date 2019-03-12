@@ -72,7 +72,6 @@ class Scanner
         $prev = new Token(Token::T_OPERATOR, 'noop');
 
         while (trim($input) !== '') {
-
             if (!preg_match(self::PATTERN, $input, $match)) {
                 // syntax error
                 throw new SyntaxError(sprintf(self::ERR_MATCH, substr($input, 0, 10)));
@@ -95,8 +94,9 @@ class Scanner
             }
 
             if (is_numeric($value)) {
-                if ($prev->type === Token::T_PCLOSE)
+                if ($prev->type === Token::T_PCLOSE) {
                     $this->tokens[] = new Token(Token::T_TIMES, '*');
+                }
 
                 $this->tokens[] = $prev = new Token(Token::T_NUMBER, (float) $value);
                 continue;
@@ -143,11 +143,30 @@ class Scanner
         }
     }
 
-    public function reset() { reset($this->tokens); } // call before reusing Scanner instance
-    public function curr() { return current($this->tokens); }
-    public function next() { return next($this->tokens); }
-    public function prev() { return prev($this->tokens); }
-    public function dump() { print_r($this->tokens); }
+    public function reset()
+    {
+        reset($this->tokens);
+    } // call before reusing Scanner instance
+
+    public function curr()
+    {
+        return current($this->tokens);
+    }
+    
+    public function next()
+    {
+        return next($this->tokens);
+    }
+
+    public function prev()
+    {
+        return prev($this->tokens);
+    }
+
+    public function dump()
+    {
+        print_r($this->tokens);
+    }
 
     public function peek()
     {

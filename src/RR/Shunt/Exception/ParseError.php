@@ -34,4 +34,6 @@ namespace RR\Shunt\Exception;
 
 use Exception;
 
-class ParseError extends Exception {}
+class ParseError extends Exception
+{
+}

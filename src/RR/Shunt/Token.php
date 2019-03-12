@@ -34,7 +34,6 @@ namespace RR\Shunt;
 
 class Token
 {
-
     const T_NUMBER          = 1,  // a number (integer / double)
           T_IDENT           = 2,  // constant
           T_FUNCTION        = 4,  // function
@@ -62,7 +61,9 @@ class Token
           T_OR              = 32768, // |
           T_XOR             = 65536; // ><
 
-    public $type, $value, $argc = 0;
+    public $type;
+    public $value;
+    public $argc = 0;
 
     public function __construct($type, $value)
     {

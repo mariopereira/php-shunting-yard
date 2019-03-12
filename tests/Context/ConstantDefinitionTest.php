@@ -8,7 +8,6 @@ use Exception;
 
 class ConstantDefinitionTest extends \PHPUnit\Framework\TestCase
 {
-
     public function constantsProvider()
     {
         return array(
@@ -57,11 +56,10 @@ class ConstantDefinitionTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testNonNumericConstantDefinitionException()
     {
+        $this->expectException(\Exception::class);
+
         $context = new Context();
         $context->def('const', 'Just a String That Causes Error #$#$%#@');
     }
@@ -70,13 +68,14 @@ class ConstantDefinitionTest extends \PHPUnit\Framework\TestCase
     {
         $context = new Context();
         $context->def('const', 'string constant', 'string');
+
+        $this->assertEquals($context->cs('const'), 'string constant');
     }
 
-    /**
-     * @expectedException \RR\Shunt\Exception\RuntimeError
-     */
     public function testCallNotSetConstantCausesException()
     {
+        $this->expectException(\RR\Shunt\Exception\RuntimeError::class);
+
         $context = new Context();
         $context->cs('notdefinedfunction');
     }

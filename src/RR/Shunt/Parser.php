@@ -40,8 +40,10 @@ class Parser
     const WAITING_FOR_OPERAND_OR_UNARY_SIGN = 1,    // waiting for operand or unary sign
           WAITING_FOR_OPERATOR = 2;                 // waiting for operator
 
-    protected $scanner, $state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
-    protected $queue, $stack;
+    protected $scanner;
+    protected $state = self::WAITING_FOR_OPERAND_OR_UNARY_SIGN;
+    protected $queue;
+    protected $stack;
     protected $queueCopy;
 
     public function __construct(Scanner $scanner)
@@ -60,8 +62,9 @@ class Parser
         // When there are no more tokens to read:
         // While there are still operator tokens in the stack:
         while ($t = array_pop($this->stack)) {
-            if ($t->type === Token::T_POPEN || $t->type === Token::T_PCLOSE)
+            if ($t->type === Token::T_POPEN || $t->type === Token::T_PCLOSE) {
                 throw new ParseError('parser error: incorrect nesting of `(` and `)`');
+            }
 
             $this->queue[] = $t;
         }
@@ -127,14 +130,16 @@ class Parser
                     $na = $this->argc($t);
 
                     // If there are fewer than n values on the stack
-                    if ($len < $na)
+                    if ($len < $na) {
                         throw new RuntimeError('run-time error: too few parameters for operator "' . $t->value . '" (' . $na . ' -> ' . $len . ')');
+                    }
 
                     $rhs = array_pop($this->stack);
                     $lhs = null;
 
-                    if ($na > 1)
+                    if ($na > 1) {
                         $lhs = array_pop($this->stack);
+                    }
 
                     // if ($lhs) print "{$lhs->value} {$t->value} {$rhs->value}\n";
                     // else print "{$t->value} {$rhs->value}\n";
@@ -153,8 +158,9 @@ class Parser
 
                     $len -= $argc - 1;
 
-                    for (; $argc > 0; --$argc)
+                    for (; $argc > 0; --$argc) {
                         array_unshift($argv, array_pop($this->stack)->value);
+                    }
 
                     // Push the returned results, if any, back onto the stack.
                     $this->stack[] = new Token(Token::T_NUMBER, $ctx->fn($t->value, $argv));
@@ -192,8 +198,7 @@ class Parser
             $lhs = $lhs->value;
             $rhs = $rhs->value;
 
-            switch  ($op)
-            {
+            switch ($op) {
                 case Token::T_GREATER_EQUAL:
                 case Token::T_LESS_EQUAL:
                 case Token::T_GREATER:
@@ -204,27 +209,22 @@ class Parser
                 case Token::T_DIV:
                 case Token::T_MOD:
                 case Token::T_POW:
-                    if (is_bool($lhs) && is_bool($rhs))
-                    {
+                    if (is_bool($lhs) && is_bool($rhs)) {
                         throw new RuntimeError('run-time error: trying to do a number only operation over two booleans');
-                    }
-                    else if (is_bool($lhs) || is_bool($rhs))
-                    {
+                    } elseif (is_bool($lhs) || is_bool($rhs)) {
                         throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
                     }
                     break;
                 case Token::T_EQUAL:
                 case Token::T_NOT_EQUAL:
-                    if (is_bool($lhs) ^ is_bool($rhs))
-                    {
+                    if (is_bool($lhs) ^ is_bool($rhs)) {
                         throw new RuntimeError('run-time error: trying to calculate a value out of a decimal and a boolean');
                     }
                     break;
                 case Token::T_AND:
                 case Token::T_OR:
                 case Token::T_XOR:
-                    if (!is_bool($lhs) || !is_bool($rhs))
-                    {
+                    if (!is_bool($lhs) || !is_bool($rhs)) {
                         throw new RuntimeError('run-time error: trying to do a boolean only operation over two numbers');
                     }
                     break;
@@ -268,14 +268,16 @@ class Parser
                     return $lhs * $rhs;
 
                 case Token::T_DIV:
-                    if ($rhs === 0.)
+                    if ($rhs === 0.) {
                         throw new RuntimeError('run-time error: division by zero');
+                    }
 
                     return $lhs / $rhs;
 
                 case Token::T_MOD:
-                    if ($rhs === 0.)
+                    if ($rhs === 0.) {
                         throw new RuntimeError('run-time error: rest-division by zero');
+                    }
 
                     return (float)$lhs % $rhs;
 
@@ -360,15 +362,17 @@ class Parser
                 $this->handle($t);
 
                 // nested parenthesis inside function calls
-                if ($t->type === Token::T_POPEN)
+                if ($t->type === Token::T_POPEN) {
                     $parenthesis++;
-                elseif ($t->type === Token::T_PCLOSE && $parenthesis-- === 0)
+                } elseif ($t->type === Token::T_PCLOSE && $parenthesis-- === 0) {
                     break;
+                }
 
                 $argc = max($argc, 1); // at least 1 arg if bracket not closed immediately
 
-                if ($t->type === Token::T_COMMA)
+                if ($t->type === Token::T_COMMA) {
                     ++$argc;
+                }
             }
         }
 
@@ -410,8 +414,9 @@ class Parser
 
                 // If no left parentheses are encountered, either the separator was misplaced
                 // or parentheses were mismatched.
-                if ($pe !== true)
+                if ($pe !== true) {
                     throw new ParseError('parser error: missing token `(` or misplaced token `,`');
+                }
 
                 break;
 
@@ -469,8 +474,9 @@ class Parser
                             $p1 = $this->preced($t);
                             $p2 = $this->preced($s);
 
-                            if (!(($this->assoc($t) === 1 && ($p1 <= $p2)) || ($p1 < $p2)))
+                            if (!(($this->assoc($t) === 1 && ($p1 <= $p2)) || ($p1 < $p2))) {
                                 break 2;
+                            }
 
                             // Pop o2 off the stack, onto the output queue;
                             $this->queue[] = array_pop($this->stack);
@@ -505,12 +511,14 @@ class Parser
                 }
 
                 // If the stack runs out without finding a left parenthesis, then there are mismatched parentheses.
-                if ($pe !== true)
+                if ($pe !== true) {
                     throw new ParseError('parser error: unexpected token `)`');
+                }
 
                 // If the token at the top of the stack is a function token, pop it onto the output queue.
-                if (($t = end($this->stack)) && $t->type === Token::T_FUNCTION)
+                if (($t = end($this->stack)) && $t->type === Token::T_FUNCTION) {
                     $this->queue[] = array_pop($this->stack);
+                }
 
                 $this->state = self::WAITING_FOR_OPERATOR;
                 break;

@@ -94,7 +94,7 @@ class ConstantsParserTest extends \PHPUnit\Framework\TestCase
                     'c' => 8,
                     'd' => 4,
                 ),
-                (1+3-pow(8,4))
+                (1+3-pow(8, 4))
             ),
             array(
                 '2(a+b)^c',
@@ -118,5 +118,4 @@ class ConstantsParserTest extends \PHPUnit\Framework\TestCase
 
         $this->assertEquals($const, $actual);
     }
-
 }

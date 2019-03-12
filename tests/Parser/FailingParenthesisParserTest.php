@@ -7,12 +7,10 @@ use RR\Shunt\Exception\RuntimeError;
 
 class FailingParenthesisParserTest extends \PHPUnit\Framework\TestCase
 {
-	
     public function testParenthesisThrowsError()
     {
-		$this->expectOutputString(null);
+        $this->expectOutputString('');
         $equation = '()';
-		return Parser::parse($equation);
+        return Parser::parse($equation);
     }
-
 }

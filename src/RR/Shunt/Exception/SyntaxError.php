@@ -34,4 +34,6 @@ namespace RR\Shunt\Exception;
 
 use Exception;
 
-class SyntaxError extends Exception {}
+class SyntaxError extends Exception
+{
+}

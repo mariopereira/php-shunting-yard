@@ -69,21 +69,19 @@ class SimpleParserTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    /**
-     * @expectedException \RR\Shunt\Exception\RuntimeError
-     */
     public function testDivisionFromZero()
     {
+        $this->expectException(\RR\Shunt\Exception\RuntimeError::class);
+
         $equation = '100/0';
 
         Parser::parse($equation);
     }
 
-    /**
-     * @expectedException \RR\Shunt\Exception\RuntimeError
-     */
     public function testModulusFromZero()
     {
+        $this->expectException(\RR\Shunt\Exception\RuntimeError::class);
+
         $equation = '100%0';
 
         Parser::parse($equation);

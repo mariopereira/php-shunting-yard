@@ -5,10 +5,8 @@ namespace tests\Parser;
 use RR\Shunt\Parser;
 use RR\Shunt\Context;
 
-
 class FunctionParserTest extends \PHPUnit\Framework\TestCase
 {
-
     public function testFunctionCallWithOneParam()
     {
         $context = new Context();
@@ -132,11 +130,10 @@ class FunctionParserTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    /**
-     * @expectedException RR\Shunt\Exception\ParseError
-     */
     public function testParserExceptionMissingClosingBracket()
     {
+        $this->expectException(\RR\Shunt\Exception\ParseError::class);
+
         $context = new Context();
         $context->def('pi');
 
@@ -144,16 +141,14 @@ class FunctionParserTest extends \PHPUnit\Framework\TestCase
         $actual = Parser::parse($equation, $context);
     }
 
-    /**
-     * @expectedException RR\Shunt\Exception\ParseError
-     */
     public function testParserExceptionSurplusClosingBracket()
     {
+        $this->expectException(\RR\Shunt\Exception\ParseError::class);
+
         $context = new Context();
         $context->def('pi');
 
         $equation = 'pi())';
         $actual = Parser::parse($equation, $context);
     }
-
 }

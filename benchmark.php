@@ -59,7 +59,6 @@ function benchmark($term)
 
     $totalExecutionTime = microtime(true) - $a;
     print "reduce  : " . (round($totalExecutionTime, 6)) . "s  ".round(($totalExecutionTime/$iterations), 10)."s  per operation\n\n";
-
 }
 
 benchmark('1+1');
