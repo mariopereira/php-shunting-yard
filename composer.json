@@ -1,9 +1,9 @@
 {
-    "name": "andig/php-shunting-yard",
+    "name": "mariopereira/php-shunting-yard",
     "type": "library",
     "keywords": ["math","shunting yard", "equation"],
-    "homepage": "https://github.com/andig/php-shunting-yard",
-    "description": "Refactored repack of https://github.com/droptable/php-shunting-yard",
+    "homepage": "https://github.com/mariopereira/php-shunting-yard",
+    "description": "Fork of https://github.com/andig/php-shunting-yard",
     "license": "MIT",
     "autoload": {
         "psr-0": {
