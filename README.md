@@ -72,6 +72,8 @@ Define the following requirement in your composer.json file:
 
 ### Authors
 
+Forked from https://github.andig/php-shunting-yard.
+
 Originally source code taken from https://github.com/droptable/php-shunting-yard, some changes from:
 
   - https://github.com/andig/php-shunting-yard
