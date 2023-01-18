@@ -65,7 +65,7 @@ Define the following requirement in your composer.json file:
 ```json
 {
     "require": {
-        "andig/php-shunting-yard": "dev-master"
+        "mariopereira/php-shunting-yard": "dev-master"
     }
 }
 ```
