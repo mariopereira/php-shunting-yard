@@ -67,6 +67,25 @@ class Context
      */
     public function cs($name)
     {
+        // check if we have a quoted value
+        // if so, we return that value unquoted
+        $len = strlen($name);
+
+        if ($len > 1) {
+            $start = substr($name, 0, 1);
+            $end = substr($name, -1, 1);
+
+            if (in_array($start, array('"', "'"))) {
+                if ($start != $end) {
+                    throw new RuntimeError('run-time error: bad quoted value: ' . $name);
+                }
+
+                $name = substr($name, 1, $len - 2);
+
+                return $name;
+            }
+        }
+        
         if (!isset($this->constants[$name])) {
             throw new RuntimeError('run-time error: undefined constant "' . $name . '"');
         }
